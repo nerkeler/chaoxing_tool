@@ -1,7 +1,16 @@
-import requests,json
+import requests,json,lxml
 from tkinter import *
 from tkinter import Scrollbar
+from tkinter import messagebox
 import tkinter.font as tf
+
+
+
+
+
+from lxml import etree
+
+
 
 
 class AnswerGUI(Frame):
@@ -14,60 +23,103 @@ class AnswerGUI(Frame):
         self.grid()
         self.history = []           #搜索历史保存列表
         self.createWiget()          #运行主程序
+        #self.message()
+
+
+    def message(self):
+        res = requests.get("https://github.com/nerkeler/chaoxing_tool")
+        res.encoding = res.apparent_encoding
+        respose = res.text
+        html = etree.HTML(respose)
+        results = html.xpath('//*[@id="cfccb7cbb03405b11ccdc04723e21753-d5762b3a3012507df677365576f3793593a82894"]')
+        for result in results:
+            message = "当前版本：" + str(result.text)
+        messagebox.showinfo(title="提示",message=message)
 
     def createWiget(self):#创建布局
 
+        """输入控件"""
+        frame_input = LabelFrame(self.master, text="搜索框", labelanchor="nw")
+        frame_input.grid(row=0,column=1,rowspan=2,columnspan=4,padx=8, pady=5,sticky=NSEW)
+
+        """输出控件"""
+        frame_output = LabelFrame(self.master, text="搜索结果", labelanchor="nw")
+        frame_output.grid(row=2, column=1, rowspan=6, columnspan=4, padx=8, pady=5,sticky=NSEW)
+
         """提示文字"""
-        self.lay = Label(self.master,text="请输入需要搜索的题目：(整体查询（首选）或关键字查询（次选））")
-        self.lay.grid(row=0,column=0,columnspan=4,sticky=NSEW,padx=5,)
+        self.lay = Label(frame_input,text="请输入需要搜索的题目：(整体查询（首选）或关键字查询（次选））")
+        self.lay.grid(row=1,column=0,columnspan=4,sticky=NSEW,padx=5,)
 
         """输入文本框"""
         v1 = StringVar()
-        self.eny1 = Entry(self.master, textvariable=v1,width=30,font=self.ft )
-        self.eny1.grid(row=2,column=0,columnspan=3,sticky=NSEW,pady=5,padx=8)
+        self.eny1 = Entry(frame_input, textvariable=v1,width=30,font=self.ft )
+        self.eny1.grid(row=2,column=0,columnspan=3,sticky=NSEW,padx=8,pady=5)
         self.eny1.bind("<Return>",lambda event:self.get_answer())           #绑定回车按键,隐式函数
 
         """天键按键"""
-        btn1 = Button(self.master, text='天键', command=self.sky_button)
-        btn1.grid(row=2, column=3, sticky=NSEW, pady=5, padx=8)
+        btn1 = Button(frame_input, text='天键', command=self.sky_button)
+        btn1.grid(row=2, column=3, sticky=NSEW, pady=5,padx=8 )
 
         """确定按键"""
-        btn1 = Button(self.master,text='确定',command=self.get_answer)
+        btn1 = Button(frame_input,text='确定',command=self.get_answer)
         btn1.grid(row=3,column=3,sticky=NSEW,pady=5,padx=8)
 
         """清空按键"""
-        btn2 = Button(self.master, text='清空', command=lambda :self.eny1.delete(0,END))
+        btn2 = Button(frame_input, text='清空', command=lambda :self.eny1.delete(0,END))
         btn2.grid(row=3, column=1, sticky=NSEW, pady=5, padx=8)
 
         """粘贴按键"""
-        btn2 = Button(self.master, text='粘贴', command=self.buttonTest)
+        btn2 = Button(frame_input, text='粘贴', command=self.buttonTest)
         btn2.grid(row=3, column=2, sticky=NSEW, pady=5, padx=8)
 
         """历史按键"""
-        btn2 = Button(self.master, text='历史', command=self.get_history)
+        btn2 = Button(frame_input, text='历史', command=self.get_history)
         btn2.grid(row=3, column=0, sticky=NSEW, pady=5, padx=8)
 
         """text 输出框"""
-        self.tet = Text(self.master, width=40, height=15,font=self.ft)
-        self.tet.grid(row=4,column=0,columnspan=4,pady=5,padx=8)
+        self.tet = Text(frame_output, width=40, height=17,font=self.ft)
+        self.tet.grid(row=4,column=0,columnspan=3,pady=5,padx=8)
 
         """初始使用说明"""
-        self.tet.insert(INSERT,"**新增‘天键’，即一键顺序完成清空，粘贴，确定功能。手动输入题目请勿使用**\n\n")
+        self.tet.insert(INSERT,"**v1.7:更改整体布局，加入GitHub地址**\n")
+        self.tet.insert(INSERT,"**v1.5:增‘天键’，即一键顺序完成清空，粘贴，确定等功能。手动输入题目请勿使用**\n\n")
         self.tet.insert(INSERT,"1、本应用为超星尔雅查题工具，支持超星尔雅平台和智慧树知道平台。\n")
         self.tet.insert(INSERT,"2、第一行为题目输入框。\n")
         self.tet.insert(INSERT,"3、右键粘贴或 ctrl+v，ctrl+a全选，enter 回车确定，添加了纵向滚动条。\n")
         self.tet.insert(INSERT,"4、输出文本框禁用编辑,历史默认保存最近10条查询记录\n")
-        self.tet.insert(INSERT,"5、联系反馈邮箱：2739038007@qq.com\n")
+        self.tet.insert(INSERT,"5、联系反馈邮箱：2739038007@qq.com\n作者：nerkeler\nGithub源码地址:https://github.com/nerkeler/chaoxing_tool\n")
         self.tet.insert(INSERT,"6、基于python tkinter 编写，技术不足之处还望谅解。\n\n")
         self.tet.insert(INSERT,"友情提示：\n   查题时优先复制题目所有内容，整体搜索失败可尝试关键字查询， 由于查题api是调用外部接口，所以应用需要不定期更改查题接口。")
         self.tet.insert(INSERT,"如发现查题失败，请尽快联系本人，并附上你的联系方式,我会尽快修复！\n感谢支持！")
         self.tet.config(state=DISABLED)         #禁用编辑
 
         """添加纵向滚动条"""
-        scroll = Scrollbar(root)
-        scroll.grid(row=4,column=4,sticky='ns')
+        scroll = Scrollbar(frame_output)
+        scroll.grid(row=4,column=3,sticky='ns',)
         self.tet.configure(yscrollcommand = scroll.set)
         scroll.configure(command=self.tet.yview)
+
+
+        """#编写作者说明
+        self.pos = 0
+        self.show_start=StringVar(self.master)
+        self.source = "作者:nerkeler GitHub源码地址：https://github.com/nerkeler/chaoxing_tool 本应用为个人开发测试使用，请于24小时内删除。          "
+        self.show_start.set(self.source[0:50])
+        self.lay2 = Label(self.master,textvariable=self.show_start,)
+        self.lay2.grid(row=8,column=3,columnspan=4,sticky=EW,)
+        self.marquee(self.lay2)
+    def marquee(self,widget):
+        textwidth = 50
+        strlen = len(self.source)
+        if strlen - self.pos < 50:
+            self.show_start.set(self.source[self.pos:self.pos + textwidth] + self.source[0:50 - strlen + self.pos])
+        else:
+            self.show_start.set(self.source[self.pos:self.pos + textwidth])
+        self.pos += 1
+
+        if self.pos > strlen:
+            self.pos = 0
+        widget.after(250, self.marquee, widget)"""
 
     """调用api搜索题目"""
     def get_answer(self):
@@ -115,7 +167,7 @@ class AnswerGUI(Frame):
 if __name__ == '__main__':
     root = Tk()
     root.iconbitmap("xuexitong.ico")
-    root.geometry("400x435+500+300")
-    root.title('超星尔雅查题工具v1.5')
+    root.geometry("418x536+500+220")
+    root.title('超星尔雅查题工具v1.7')
     app = AnswerGUI(master=root)
     root.mainloop()
