@@ -2,11 +2,11 @@ import requests,json,random
 from tkinter import *
 from tkinter import Scrollbar,messagebox
 import tkinter.font as tf
+
 """
 作者：nerkeler
 时间：2020-06-30
 联系邮箱：2739038007@qq.com
-
 """
 
 
